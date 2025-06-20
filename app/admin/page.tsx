@@ -1043,7 +1043,7 @@ export default function AdminPage() {
             <SidebarTrigger className="-ml-1" />
             <div className="flex items-center gap-2 text-sm text-teal-600">
               <Settings className="h-4 w-4" />
-              <span>Administration Panel - Powered by Supabase</span>
+              <span>Administration Panel</span>
             </div>
           </header>
           <main className="flex-1 p-6">{renderContent()}</main>

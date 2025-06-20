@@ -12,72 +12,47 @@ const generateChannelName = (base: string) => `${base}_${Date.now()}_${Math.rand
 // Automation Links CRUD
 export const automationLinksService = {
   async getAll() {
-    const { data, error } = await supabase
-      .from("automation_links")
-      .select("*")
-      .order("created_at", { ascending: false })
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/links");
+    if (!res.ok) throw new Error("Failed to fetch links");
+    return res.json();
   },
 
   async getById(id: string) {
-    const { data, error } = await supabase.from("automation_links").select("*").eq("id", id).single()
-
-    if (error) throw error
-    return data
+    const res = await fetch(`/api/links?id=${encodeURIComponent(id)}`);
+    if (!res.ok) throw new Error("Failed to fetch link");
+    return res.json();
   },
 
   async create(link: Database["public"]["Tables"]["automation_links"]["Insert"]) {
-    const { data, error } = await supabase
-      .from("automation_links")
-      .insert({
-        ...link,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/links", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(link),
+    });
+    if (!res.ok) throw new Error("Failed to create link");
+    return res.json();
   },
 
   async update(id: string, updates: Database["public"]["Tables"]["automation_links"]["Update"]) {
-    const { data, error } = await supabase
-      .from("automation_links")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/links", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...updates }),
+    });
+    if (!res.ok) throw new Error("Failed to update link");
+    return res.json();
   },
 
   async delete(id: string) {
-    console.log("Deleting automation link:", id)
-
-    // First delete related click analytics
-    const { error: analyticsError } = await supabase.from("click_analytics").delete().eq("link_id", id)
-
-    if (analyticsError) {
-      console.error("Error deleting click analytics:", analyticsError)
-      // Don't throw here, continue with link deletion
+    const res = await fetch("/api/links", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to delete link");
     }
-
-    // Then delete the link
-    const { error } = await supabase.from("automation_links").delete().eq("id", id)
-
-    if (error) {
-      console.error("Error deleting automation link:", error)
-      throw error
-    }
-
-    console.log("Successfully deleted automation link:", id)
   },
 
   async incrementClick(id: string, sessionId?: string) {
@@ -182,57 +157,41 @@ export const automationLinksService = {
 // Categories CRUD
 export const categoriesService = {
   async getAll() {
-    const { data, error } = await supabase.from("categories").select("*").order("name", { ascending: true })
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/categories");
+    if (!res.ok) throw new Error("Failed to fetch categories");
+    return res.json();
   },
 
   async create(category: Database["public"]["Tables"]["categories"]["Insert"]) {
-    const { data, error } = await supabase
-      .from("categories")
-      .insert({
-        ...category,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(category),
+    });
+    if (!res.ok) throw new Error("Failed to create category");
+    return res.json();
   },
 
   async update(id: string, updates: Database["public"]["Tables"]["categories"]["Update"]) {
-    const { data, error } = await supabase
-      .from("categories")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/categories", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...updates }),
+    });
+    if (!res.ok) throw new Error("Failed to update category");
+    return res.json();
   },
 
   async delete(id: string) {
-    // Check if category is being used by any links
-    const { data: linksUsingCategory } = await supabase
-      .from("automation_links")
-      .select("id")
-      .eq("category", (await supabase.from("categories").select("name").eq("id", id).single()).data?.name)
-      .limit(1)
-
-    if (linksUsingCategory && linksUsingCategory.length > 0) {
-      throw new Error("Cannot delete category that is being used by automation links")
+    const res = await fetch("/api/categories", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to delete category");
     }
-
-    const { error } = await supabase.from("categories").delete().eq("id", id)
-
-    if (error) throw error
   },
 
   subscribe(callback: (payload: any) => void) {
@@ -287,46 +246,41 @@ export const categoriesService = {
 // Users CRUD
 export const usersService = {
   async getAll() {
-    const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/users");
+    if (!res.ok) throw new Error("Failed to fetch users");
+    return res.json();
   },
 
   async create(user: Database["public"]["Tables"]["users"]["Insert"]) {
-    const { data, error } = await supabase
-      .from("users")
-      .insert({
-        ...user,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    });
+    if (!res.ok) throw new Error("Failed to create user");
+    return res.json();
   },
 
   async update(id: string, updates: Database["public"]["Tables"]["users"]["Update"]) {
-    const { data, error } = await supabase
-      .from("users")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
+    const res = await fetch("/api/users", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...updates }),
+    });
+    if (!res.ok) throw new Error("Failed to update user");
+    return res.json();
   },
 
   async delete(id: string) {
-    const { error } = await supabase.from("users").delete().eq("id", id)
-
-    if (error) throw error
+    const res = await fetch("/api/users", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to delete user");
+    }
   },
 
   async updateLastActive(id: string) {
