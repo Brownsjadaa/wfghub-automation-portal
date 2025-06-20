@@ -195,10 +195,15 @@ export default function AdminPage() {
   const handleDeleteLink = async (id: string) => {
     console.log("Attempting to delete link with ID:", id)
     setIsDeletingLink(id)
+
     try {
+      console.log("Calling automationLinksService.delete...")
       await automationLinksService.delete(id)
       console.log("Link deleted successfully:", id)
       toast.success("Automation tool deleted successfully!")
+
+      // Force a refetch to ensure UI is updated
+      await refetchLinks()
     } catch (error) {
       console.error("Error deleting link:", error)
       toast.error(error instanceof Error ? error.message : "Failed to delete automation tool")
