@@ -193,19 +193,34 @@ export default function AdminPage() {
   }
 
   const handleDeleteLink = async (id: string) => {
+    console.log("Attempting to delete link with ID:", id)
     setIsDeletingLink(id)
     try {
       await automationLinksService.delete(id)
+      console.log("Link deleted successfully:", id)
       toast.success("Automation tool deleted successfully!")
     } catch (error) {
       console.error("Error deleting link:", error)
-      toast.error("Failed to delete automation tool")
+      toast.error(error instanceof Error ? error.message : "Failed to delete automation tool")
     } finally {
       setIsDeletingLink(null)
     }
   }
 
   // Category management functions
+  const handleDeleteCategory = async (id: string) => {
+    setIsDeletingCategory(id)
+    try {
+      await categoriesService.delete(id)
+      toast.success("Category deleted successfully!")
+    } catch (error) {
+      console.error("Error deleting category:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to delete category")
+    } finally {
+      setIsDeletingCategory(null)
+    }
+  }
+
   const handleCreateCategory = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsCreatingCategory(true)
@@ -254,19 +269,6 @@ export default function AdminPage() {
       toast.error("Failed to update category")
     } finally {
       setIsUpdatingCategory(false)
-    }
-  }
-
-  const handleDeleteCategory = async (id: string) => {
-    setIsDeletingCategory(id)
-    try {
-      await categoriesService.delete(id)
-      toast.success("Category deleted successfully!")
-    } catch (error) {
-      console.error("Error deleting category:", error)
-      toast.error(error instanceof Error ? error.message : "Failed to delete category")
-    } finally {
-      setIsDeletingCategory(null)
     }
   }
 
@@ -638,7 +640,12 @@ export default function AdminPage() {
                   </Dialog>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" disabled={isDeletingLink === link.id}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isDeletingLink === link.id}
+                        onClick={() => console.log("Delete button clicked for link:", link.id)}
+                      >
                         {isDeletingLink === link.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
@@ -655,7 +662,14 @@ export default function AdminPage() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteLink(link.id)}>Delete</AlertDialogAction>
+                        <AlertDialogAction
+                          onClick={() => {
+                            console.log("Confirm delete clicked for link:", link.id)
+                            handleDeleteLink(link.id)
+                          }}
+                        >
+                          Delete
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>

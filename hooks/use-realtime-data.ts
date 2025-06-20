@@ -22,6 +22,7 @@ export function useRealtimeLinks() {
       setLinks(data)
       setError(null)
     } catch (err) {
+      console.error("Error loading links:", err)
       setError(err instanceof Error ? err.message : "Failed to load links")
     }
   }, [])
@@ -47,7 +48,7 @@ export function useRealtimeLinks() {
           setLoading(false)
         }
 
-        // Setup subscription after initial load
+        // Setup subscription after initial load with error handling
         setTimeout(() => {
           if (isMounted && !subscriptionRef.current) {
             try {
@@ -66,10 +67,12 @@ export function useRealtimeLinks() {
               })
             } catch (error) {
               console.error("Failed to setup links subscription:", error)
+              // Don't throw here, just log the error
             }
           }
-        }, 500)
+        }, 1000)
       } catch (err) {
+        console.error("Initialization error:", err)
         if (isMounted) {
           setError(err instanceof Error ? err.message : "Failed to initialize")
           setLoading(false)
@@ -82,7 +85,11 @@ export function useRealtimeLinks() {
     return () => {
       isMounted = false
       if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe()
+        try {
+          subscriptionRef.current.unsubscribe()
+        } catch (error) {
+          console.error("Error unsubscribing from links:", error)
+        }
         subscriptionRef.current = null
       }
     }
@@ -92,6 +99,7 @@ export function useRealtimeLinks() {
     try {
       await loadLinks()
     } catch (err) {
+      console.error("Error refetching links:", err)
       setError(err instanceof Error ? err.message : "Failed to refetch links")
     }
   }, [loadLinks])
@@ -112,6 +120,7 @@ export function useRealtimeCategories() {
       setCategories(data)
       setError(null)
     } catch (err) {
+      console.error("Error loading categories:", err)
       setError(err instanceof Error ? err.message : "Failed to load categories")
     }
   }, [])
@@ -153,8 +162,9 @@ export function useRealtimeCategories() {
               console.error("Failed to setup categories subscription:", error)
             }
           }
-        }, 500)
+        }, 1000)
       } catch (err) {
+        console.error("Categories initialization error:", err)
         if (isMounted) {
           setError(err instanceof Error ? err.message : "Failed to initialize")
           setLoading(false)
@@ -167,7 +177,11 @@ export function useRealtimeCategories() {
     return () => {
       isMounted = false
       if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe()
+        try {
+          subscriptionRef.current.unsubscribe()
+        } catch (error) {
+          console.error("Error unsubscribing from categories:", error)
+        }
         subscriptionRef.current = null
       }
     }
@@ -177,6 +191,7 @@ export function useRealtimeCategories() {
     try {
       await loadCategories()
     } catch (err) {
+      console.error("Error refetching categories:", err)
       setError(err instanceof Error ? err.message : "Failed to refetch categories")
     }
   }, [loadCategories])
@@ -197,6 +212,7 @@ export function useRealtimeUsers() {
       setUsers(data)
       setError(null)
     } catch (err) {
+      console.error("Error loading users:", err)
       setError(err instanceof Error ? err.message : "Failed to load users")
     }
   }, [])
@@ -238,8 +254,9 @@ export function useRealtimeUsers() {
               console.error("Failed to setup users subscription:", error)
             }
           }
-        }, 500)
+        }, 1000)
       } catch (err) {
+        console.error("Users initialization error:", err)
         if (isMounted) {
           setError(err instanceof Error ? err.message : "Failed to initialize")
           setLoading(false)
@@ -252,7 +269,11 @@ export function useRealtimeUsers() {
     return () => {
       isMounted = false
       if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe()
+        try {
+          subscriptionRef.current.unsubscribe()
+        } catch (error) {
+          console.error("Error unsubscribing from users:", error)
+        }
         subscriptionRef.current = null
       }
     }
@@ -262,6 +283,7 @@ export function useRealtimeUsers() {
     try {
       await loadUsers()
     } catch (err) {
+      console.error("Error refetching users:", err)
       setError(err instanceof Error ? err.message : "Failed to refetch users")
     }
   }, [loadUsers])
@@ -288,6 +310,7 @@ export function useRealtimeAnalytics() {
       setStats(data)
       setError(null)
     } catch (err) {
+      console.error("Error loading analytics:", err)
       setError(err instanceof Error ? err.message : "Failed to load analytics")
     }
   }, [])
@@ -329,8 +352,9 @@ export function useRealtimeAnalytics() {
               console.error("Failed to setup analytics subscriptions:", error)
             }
           }
-        }, 500)
+        }, 1000)
       } catch (err) {
+        console.error("Analytics initialization error:", err)
         if (isMounted) {
           setError(err instanceof Error ? err.message : "Failed to initialize")
           setLoading(false)
@@ -344,7 +368,11 @@ export function useRealtimeAnalytics() {
       isMounted = false
       subscriptionsRef.current.forEach((subscription) => {
         if (subscription) {
-          subscription.unsubscribe()
+          try {
+            subscription.unsubscribe()
+          } catch (error) {
+            console.error("Error unsubscribing from analytics:", error)
+          }
         }
       })
       subscriptionsRef.current = []
@@ -355,6 +383,7 @@ export function useRealtimeAnalytics() {
     try {
       await loadStats()
     } catch (err) {
+      console.error("Error refetching analytics:", err)
       setError(err instanceof Error ? err.message : "Failed to refetch analytics")
     }
   }, [loadStats])

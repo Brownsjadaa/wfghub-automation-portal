@@ -10,16 +10,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     },
   },
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
+    persistSession: false,
+    autoRefreshToken: false,
   },
 })
 
-// Test connection function
+// Test connection function with better error handling
 export const testConnection = async () => {
   try {
     const { data, error } = await supabase.from("automation_links").select("count", { count: "exact", head: true })
-    if (error) throw error
+    if (error) {
+      console.error("Connection test failed:", error)
+      return false
+    }
+    console.log("Supabase connection successful")
     return true
   } catch (error) {
     console.error("Supabase connection failed:", error)

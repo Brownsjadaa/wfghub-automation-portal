@@ -59,9 +59,25 @@ export const automationLinksService = {
   },
 
   async delete(id: string) {
+    console.log("Deleting automation link:", id)
+
+    // First delete related click analytics
+    const { error: analyticsError } = await supabase.from("click_analytics").delete().eq("link_id", id)
+
+    if (analyticsError) {
+      console.error("Error deleting click analytics:", analyticsError)
+      // Don't throw here, continue with link deletion
+    }
+
+    // Then delete the link
     const { error } = await supabase.from("automation_links").delete().eq("id", id)
 
-    if (error) throw error
+    if (error) {
+      console.error("Error deleting automation link:", error)
+      throw error
+    }
+
+    console.log("Successfully deleted automation link:", id)
   },
 
   async incrementClick(id: string, sessionId?: string) {
@@ -120,7 +136,7 @@ export const automationLinksService = {
     try {
       const channel = supabase.channel(channelName)
 
-      channel
+      const subscription = channel
         .on(
           "postgres_changes",
           {
@@ -130,17 +146,24 @@ export const automationLinksService = {
           },
           (payload) => {
             console.log("Automation links change:", payload)
-            callback(payload)
+            try {
+              callback(payload)
+            } catch (error) {
+              console.error("Error in automation links callback:", error)
+            }
           },
         )
-        .subscribe((status) => {
+        .subscribe((status, err) => {
           console.log(`Automation links subscription (${channelName}) status:`, status)
+          if (err) {
+            console.error(`Automation links subscription error:`, err)
+          }
         })
 
       return {
         unsubscribe: () => {
           try {
-            supabase.removeChannel(channel)
+            channel.unsubscribe()
             console.log(`Unsubscribed from automation links channel: ${channelName}`)
           } catch (error) {
             console.error("Error unsubscribing from automation links:", error)
@@ -200,7 +223,7 @@ export const categoriesService = {
     const { data: linksUsingCategory } = await supabase
       .from("automation_links")
       .select("id")
-      .eq("category", id)
+      .eq("category", (await supabase.from("categories").select("name").eq("id", id).single()).data?.name)
       .limit(1)
 
     if (linksUsingCategory && linksUsingCategory.length > 0) {
@@ -218,7 +241,7 @@ export const categoriesService = {
     try {
       const channel = supabase.channel(channelName)
 
-      channel
+      const subscription = channel
         .on(
           "postgres_changes",
           {
@@ -228,17 +251,24 @@ export const categoriesService = {
           },
           (payload) => {
             console.log("Categories change:", payload)
-            callback(payload)
+            try {
+              callback(payload)
+            } catch (error) {
+              console.error("Error in categories callback:", error)
+            }
           },
         )
-        .subscribe((status) => {
+        .subscribe((status, err) => {
           console.log(`Categories subscription (${channelName}) status:`, status)
+          if (err) {
+            console.error(`Categories subscription error:`, err)
+          }
         })
 
       return {
         unsubscribe: () => {
           try {
-            supabase.removeChannel(channel)
+            channel.unsubscribe()
             console.log(`Unsubscribed from categories channel: ${channelName}`)
           } catch (error) {
             console.error("Error unsubscribing from categories:", error)
@@ -320,7 +350,7 @@ export const usersService = {
     try {
       const channel = supabase.channel(channelName)
 
-      channel
+      const subscription = channel
         .on(
           "postgres_changes",
           {
@@ -330,17 +360,24 @@ export const usersService = {
           },
           (payload) => {
             console.log("Users change:", payload)
-            callback(payload)
+            try {
+              callback(payload)
+            } catch (error) {
+              console.error("Error in users callback:", error)
+            }
           },
         )
-        .subscribe((status) => {
+        .subscribe((status, err) => {
           console.log(`Users subscription (${channelName}) status:`, status)
+          if (err) {
+            console.error(`Users subscription error:`, err)
+          }
         })
 
       return {
         unsubscribe: () => {
           try {
-            supabase.removeChannel(channel)
+            channel.unsubscribe()
             console.log(`Unsubscribed from users channel: ${channelName}`)
           } catch (error) {
             console.error("Error unsubscribing from users:", error)
@@ -422,7 +459,7 @@ export const analyticsService = {
     try {
       const channel = supabase.channel(channelName)
 
-      channel
+      const subscription = channel
         .on(
           "postgres_changes",
           {
@@ -432,17 +469,24 @@ export const analyticsService = {
           },
           (payload) => {
             console.log("Analytics change:", payload)
-            callback(payload)
+            try {
+              callback(payload)
+            } catch (error) {
+              console.error("Error in analytics callback:", error)
+            }
           },
         )
-        .subscribe((status) => {
+        .subscribe((status, err) => {
           console.log(`Analytics subscription (${channelName}) status:`, status)
+          if (err) {
+            console.error(`Analytics subscription error:`, err)
+          }
         })
 
       return {
         unsubscribe: () => {
           try {
-            supabase.removeChannel(channel)
+            channel.unsubscribe()
             console.log(`Unsubscribed from analytics channel: ${channelName}`)
           } catch (error) {
             console.error("Error unsubscribing from analytics:", error)
