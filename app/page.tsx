@@ -115,7 +115,7 @@ export default function LinkBuilder() {
             </div>
             <div className="text-center sm:text-right">
               <div className="text-sm text-teal-600">Real-time Analytics</div>
-              <div className="text-xs text-slate-500">Powered by Supabase</div>
+              <div className="text-xs text-slate-500">Automation Portal for Internal Teams</div>
             </div>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function LinkBuilder() {
 
         {/* Footer */}
         <div className="mt-12 text-center text-sm text-slate-500 border-t border-green-200 pt-6">
-          <p>© 2024 Workforce Group. Real-time Analytics Portal - Powered by Supabase.</p>
+          <p>© 2025 Workforce Group. Real-time Analytics Portal.</p>
         </div>
       </div>
     </div>
